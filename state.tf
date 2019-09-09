@@ -1,5 +1,5 @@
 terraform {
   backend "gcs" {
-    bucket = ""
+    bucket = "terraform-state-kubestack-24493e8"
   }
 }
