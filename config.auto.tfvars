@@ -18,10 +18,10 @@ clusters = {
       base_domain = "timesphere.com"
 
       # Initial desired K8s version, will be upgraded automatically
-      cluster_min_master_version = "1.13.6"
+      cluster_min_master_version = "1.12.8-gke.10"
 
       # Initial number of desired nodes per zone
-      cluster_initial_node_count = 1
+      cluster_initial_node_count = 2
 
       # The Google cloud region to deploy the clusters in
       region = "us-east1"
