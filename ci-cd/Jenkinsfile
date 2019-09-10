@@ -15,10 +15,9 @@ podTemplate(
                     file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
                 ]) {
                     sh '''
-                        git clone https://github.com/horasphere/terraform-kubestack.git .
+                        git clone https://github.com/horasphere/terraform-kubestack.git
+                        cd terraform-kubestack
                         terraform init
-                        terraform workspace new ops
-                        terraform workspace new apps
                     '''
                 }
             }
@@ -29,7 +28,7 @@ podTemplate(
                 withCredentials([
                     file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
                 ]) {
-                    sh 'terraform workspace select ops'
+                    sh 'cd terraform-kubestack && terraform workspace select ops'
                 }
             }
         }
@@ -38,7 +37,7 @@ podTemplate(
                 withCredentials([
                     file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
                 ]) {
-                    sh 'terraform workspace select apps'
+                    sh 'cd terraform-kubestack && terraform workspace select apps'
                 }
             }
         }
@@ -47,7 +46,7 @@ podTemplate(
                 withCredentials([
                     file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
                 ]) {
-                    sh 'terraform plan -out=tfplan -input=false'
+                    sh 'cd terraform-kubestack && terraform plan -out=tfplan -input=false'
                 }
             }
         }
@@ -56,7 +55,7 @@ podTemplate(
                 withCredentials([
                     file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
                 ]) {
-                    sh 'terraform apply -input=false tfplan'
+                    sh 'cd terraform-kubestack && terraform apply -input=false tfplan'
                 }
             }
         }
