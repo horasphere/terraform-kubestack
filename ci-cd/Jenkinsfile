@@ -1,7 +1,7 @@
 pipeline {
     agent {
-        dockerfile {
-            filename 'ci-cd/Dockerfile'
+        node {
+            label 'kubestack'
         }
     }
     environment {
