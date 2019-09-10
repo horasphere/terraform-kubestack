@@ -9,11 +9,6 @@ podTemplate(
         env.TF_IN_AUTOMATION='true'
         env.HOME='${WORKSPACE}'
 
-        stage('Checkout') {
-            git branch: '${BRANCH_NAME}',
-                    url: 'git@github.com:horasphere/terraform-kubestack.git'
-        }
-
         stage('Terraform init') {
             container('kubestack') {
                 sh 'ls /root'
