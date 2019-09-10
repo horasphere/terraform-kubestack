@@ -3,14 +3,14 @@ clusters = {
     # Settings for Apps-cluster
     apps = {
       # The Google cloud project ID to use
-      project_id = "timesphere"
+      project_id = "kubestackpoc"
 
       # Set name_prefix used to generate the cluster_name
       # [name_prefix]-[workspace]-[region]
       # e.g. name_prefix = kbst becomes: `kbst-apps-europe-west3`
       # for small orgs the name works well,
       # for bigger orgs consider department or team names
-      name_prefix = "timesphere"
+      name_prefix = "kbst"
 
       # Set the base_domain used to generate the FQDN of the cluster
       # [cluster_name].[provider_name].[base_domain]
@@ -21,7 +21,7 @@ clusters = {
       cluster_min_master_version = "1.12.8-gke.10"
 
       # Initial number of desired nodes per zone
-      cluster_initial_node_count = 2
+      cluster_initial_node_count = 1
 
       # The Google cloud region to deploy the clusters in
       region = "us-east1"
