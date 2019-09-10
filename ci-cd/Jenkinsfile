@@ -32,11 +32,6 @@ podTemplate(
                     sh 'terraform workspace select ops'
                 }
             }
-            when {
-                not {
-                    tag comparator: 'REGEXP', pattern: '^apps-deploy-.*$'
-                }
-            }
         }
         stage('Select apps workspace') {
             container('kubestack') {
@@ -45,9 +40,6 @@ podTemplate(
                 ]) {
                     sh 'terraform workspace select apps'
                 }
-            }
-            when {
-                tag comparator: 'REGEXP', pattern: '^apps-deploy-.*$'
             }
         }
         stage('Terraform plan') {
@@ -65,16 +57,6 @@ podTemplate(
                     file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
                 ]) {
                     sh 'terraform apply -input=false tfplan'
-                }
-            }
-
-            // we always run terraform plan against ops to give developer
-            // feedback, but we only apply master to ops
-            // or matching tags to apps
-            when {
-                anyOf {
-                    branch 'master'
-                    tag comparator: 'REGEXP', pattern: '^apps-deploy-.*$'
                 }
             }
         }
