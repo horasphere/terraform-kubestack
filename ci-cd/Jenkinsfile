@@ -11,17 +11,25 @@ podTemplate(
 
         stage('Terraform init') {
             container('kubestack') {
-                sh '''
-                    git clone https://github.com/horasphere/terraform-kubestack.git 
-                    cd terraform-kubestack
-                    terraform init
-                '''
+                withCredentials([
+                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
+                ]) {
+                    sh '''
+                        git clone https://github.com/horasphere/terraform-kubestack.git
+                        cd terraform-kubestack
+                        terraform init
+                    '''
+                }
             }
         }
 
         stage('Select ops workspace') {
             container('kubestack') {
-                sh 'cd terraform-kubestack && terraform workspace select ops'
+                withCredentials([
+                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
+                ]) {
+                    sh 'cd terraform-kubestack && terraform workspace select ops'
+                }
             }
             when {
                 not {
@@ -31,7 +39,11 @@ podTemplate(
         }
         stage('Select apps workspace') {
             container('kubestack') {
-                sh 'cd terraform-kubestack && terraform workspace select apps'
+                withCredentials([
+                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
+                ]) {
+                    sh 'cd terraform-kubestack && terraform workspace select apps'
+                }
             }
             when {
                 tag comparator: 'REGEXP', pattern: '^apps-deploy-.*$'
@@ -39,12 +51,20 @@ podTemplate(
         }
         stage('Terraform plan') {
             container('kubestack') {
-                sh 'cd terraform-kubestack && terraform plan -out=tfplan -input=false'
+                withCredentials([
+                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
+                ]) {
+                    sh 'cd terraform-kubestack && terraform plan -out=tfplan -input=false'
+                }
             }
         }
         stage('Terraform apply') {
             container('kubestack') {
-                sh 'cd terraform-kubestack && terraform apply -input=false tfplan'
+                withCredentials([
+                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
+                ]) {
+                    sh 'cd terraform-kubestack && terraform apply -input=false tfplan'
+                }
             }
 
             // we always run terraform plan against ops to give developer
