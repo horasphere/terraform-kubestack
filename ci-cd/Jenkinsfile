@@ -1,30 +1,29 @@
-pipeline {
-    agent {
-        node {
-            label 'kubestack'
+podTemplate(
+        label: 'terraform-poc',
+        containers: [
+                containerTemplate(name: 'kubestack', image: 'gcr.io/timesphere/kbst-infra-automation:bootstrap', command: 'cat', ttyEnabled: true),
+        ]
+) {
+    node('terraform-poc') {
+
+        env.TF_IN_AUTOMATION='true'
+        env.HOME='${WORKSPACE}'
+
+        stage('Checkout') {
+            git branch: '${BRANCH_NAME}',
+                    url: 'git@github.com:horasphere/terraform-kubestack.git'
         }
-    }
-    environment {
-        TF_IN_AUTOMATION = 'true'
-        HOME = '${WORKSPACE}'
-    }
-    stages {
-        stage('terraform init') {
-            steps {
-                withCredentials([
-                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
-                ]) {
-                    sh 'terraform init'
-                }
+
+        stage('Terraform init') {
+            container('kubestack') {
+                sh 'ls /root'
+                sh 'terraform init'
             }
         }
-        stage('select ops workspace') {
-            steps {
-                withCredentials([
-                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
-                ]) {
-                    sh 'terraform workspace select ops'
-                }
+
+        stage('Select ops workspace') {
+            container('kubestack') {
+                sh 'terraform workspace select ops'
             }
             when {
                 not {
@@ -32,34 +31,23 @@ pipeline {
                 }
             }
         }
-        stage('select apps workspace') {
-            steps {
-                withCredentials([
-                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
-                ]) {
-                    sh 'terraform workspace select apps'
-                }
+        stage('Select apps workspace') {
+            container('kubestack') {
+                sh 'terraform workspace select apps'
             }
             when {
                 tag comparator: 'REGEXP', pattern: '^apps-deploy-.*$'
             }
         }
-        stage('terraform plan') {
-            steps {
-                withCredentials([
-                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
-                ]) {
-                    sh 'terraform plan -out=tfplan -input=false'
-                }
+        stage('Terraform plan') {
+            container('kubestack') {
+                sh 'export GOOGLE_APPLICATION_CREDENTIALS={{/root/.config}}'
+                sh 'terraform plan -out=tfplan -input=false'
             }
         }
-        stage('terraform apply') {
-            steps {
-                withCredentials([
-                    file(credentialsId: 'gcp_credentials', variable: 'GOOGLE_APPLICATION_CREDENTIALS'),
-                ]) {
-                    sh 'terraform apply -input=false tfplan'
-                }
+        stage('Terraform apply') {
+            container('kubestack') {
+                sh 'terraform apply -input=false tfplan'
             }
 
             // we always run terraform plan against ops to give developer
