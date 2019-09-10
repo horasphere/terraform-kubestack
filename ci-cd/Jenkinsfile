@@ -11,14 +11,17 @@ podTemplate(
 
         stage('Terraform init') {
             container('kubestack') {
-                sh 'ls /root'
-                sh 'terraform init'
+                sh '''
+                    git clone https://github.com/horasphere/terraform-kubestack.git 
+                    cd terraform-kubestack
+                    terraform init
+                '''
             }
         }
 
         stage('Select ops workspace') {
             container('kubestack') {
-                sh 'terraform workspace select ops'
+                sh 'cd terraform-kubestack && terraform workspace select ops'
             }
             when {
                 not {
@@ -28,7 +31,7 @@ podTemplate(
         }
         stage('Select apps workspace') {
             container('kubestack') {
-                sh 'terraform workspace select apps'
+                sh 'cd terraform-kubestack && terraform workspace select apps'
             }
             when {
                 tag comparator: 'REGEXP', pattern: '^apps-deploy-.*$'
@@ -36,13 +39,12 @@ podTemplate(
         }
         stage('Terraform plan') {
             container('kubestack') {
-                sh 'export GOOGLE_APPLICATION_CREDENTIALS={{/root/.config}}'
-                sh 'terraform plan -out=tfplan -input=false'
+                sh 'cd terraform-kubestack && terraform plan -out=tfplan -input=false'
             }
         }
         stage('Terraform apply') {
             container('kubestack') {
-                sh 'terraform apply -input=false tfplan'
+                sh 'cd terraform-kubestack && terraform apply -input=false tfplan'
             }
 
             // we always run terraform plan against ops to give developer
